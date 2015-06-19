@@ -2,8 +2,8 @@ require_relative "ontap_method_map"
 
 module NetAppManageability
   class Client
-    attr_reader :options, :svrObj
-    
+    attr_reader :options
+
     NA_STYLE_LOGIN_PASSWORD   = API::NA_STYLE_LOGIN_PASSWORD
     NA_STYLE_RPC              = API::NA_STYLE_RPC
     NA_STYLE_HOSTSEQUIV       = API::NA_STYLE_HOSTSEQUIV
