@@ -3,11 +3,11 @@ module NetAppManageability
     undef_method :id    if self.method_defined? :id
     undef_method :type  if self.method_defined? :type
     undef_method :size  if self.method_defined? :size
-    
+
     STRIP_PREFIX = "nam_"
-    
+
     attr_accessor :symKeys
-    
+
     def initialize(symKeys=false, &block)
       @symKeys = symKeys
       super()
@@ -16,11 +16,11 @@ module NetAppManageability
         self.default = nil
       end
     end
-    
+
     def to_ary
       return [ self ]
     end
-    
+
     def method_missing(sym, *args)
       key = sym.to_s.sub(/^#{STRIP_PREFIX}/, "").tr('_', '-')
       if key[-1, 1] == '='
