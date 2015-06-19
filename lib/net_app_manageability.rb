@@ -1,5 +1,5 @@
 require "net_app_manageability/version"
-
-module NetAppManageability
-  # Your code goes here...
-end
+require "net_app_manageability/nam_hash"
+require "net_app_manageability/nam_array"
+require "net_app_manageability/net_app_manageability"
+require "net_app_manageability/client"
