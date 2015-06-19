@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe NetAppManageability::Client do
-  let(:client) do 
+  let(:client) do
     NetAppManageability::Client.new(
       :server       => "127.0.0.1",
       :'auth-style' => 'foo',

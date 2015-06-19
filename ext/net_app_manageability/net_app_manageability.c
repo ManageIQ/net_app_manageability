@@ -26,7 +26,7 @@ static	ID		to_s_id;
  * Create a class constant based on the given object-like macro.
  */
 #define INTDEF2CONST(klass, intdef) \
-         rb_define_const(klass, #intdef, INT2NUM(intdef))
+		 rb_define_const(klass, #intdef, INT2NUM(intdef))
 
 #define	INT2BOOL(v)		( (v) ? Qtrue : Qfalse )
 
@@ -62,19 +62,19 @@ rb_log(VALUE level, const char *fmt, ...)	{
 	va_list ap;
 	char *p, *np;
 	int n, size = 128;
-	
+
 	if (logger == Qnil) {
 		return;
 	}
-	
+
 	if ((p = malloc(size)) == NULL)	{
 		return;
 	}
-	
+
 	va_start(ap, fmt);
 	n = vsnprintf(p, size, fmt, ap);
 	va_end(ap);
-	
+
 	if (n >= size)	{
 		size = n + 1;
 		if ((np = realloc(p, size)) == NULL) {
@@ -82,12 +82,12 @@ rb_log(VALUE level, const char *fmt, ...)	{
 			return;
 		}
 		p = np;
-	
+
 		va_start(ap, fmt);
 		vsnprintf(p, size, fmt, ap);
 		va_end(ap);
 	}
-	
+
 	rb_funcall(logger, level, 1, rb_str_new2(p));
 	free(p);
 }
@@ -146,11 +146,11 @@ server_open(VALUE rSelf, VALUE rServer, VALUE rMajor, VALUE rMinor) {
 	int				cMinor;
 	char			*cServer;
 	na_server_t		*s;
-	
+
 	cServer	= StringValuePtr(rServer);
 	cMajor	= NUM2UINT(rMajor);
 	cMinor	= NUM2UINT(rMinor);
-	
+
 	rb_log(LOG_VERBOSE, "%s.server_open [calling]: server = %s, major = %d, minor = %d", class_name, cServer, cMajor, cMinor);
 	if ((s = na_server_open(cServer, cMajor, cMinor)) == NULL) {
 		rb_raise(rb_eAPIError, "%s.server_open: could not open connection to server %s", class_name, cServer);
@@ -166,7 +166,7 @@ static VALUE
 server_get_style(VALUE rSelf, VALUE rServer) {
 	na_server_t		*s;
 	na_style_t		rv;
-	
+
 	Data_Get_Struct(rServer, na_server_t, s);
 	rb_log(LOG_VERBOSE, "%s.server_get_style [calling]", class_name);
 	rv = na_server_get_style(s);
@@ -181,7 +181,7 @@ static VALUE
 server_get_transport_type(VALUE rSelf, VALUE rServer) {
 	na_server_t				*s;
 	na_server_transport_t	rv;
-	
+
 	Data_Get_Struct(rServer, na_server_t, s);
 	rb_log(LOG_VERBOSE, "%s.na_server_get_transport_type [calling]", class_name);
 	rv = na_server_get_transport_type(s);
@@ -196,7 +196,7 @@ static VALUE
 server_get_port(VALUE rSelf, VALUE rServer) {
 	na_server_t		*s;
 	int				rv;
-	
+
 	Data_Get_Struct(rServer, na_server_t, s);
 	rb_log(LOG_VERBOSE, "%s.server_get_port [calling]", class_name);
 	rv = na_server_get_port(s);
@@ -211,7 +211,7 @@ static VALUE
 server_get_timeout(VALUE rSelf, VALUE rServer) {
 	na_server_t		*s;
 	int				rv;
-	
+
 	Data_Get_Struct(rServer, na_server_t, s);
 	rb_log(LOG_VERBOSE, "%s.server_get_timeout [calling]", class_name);
 	rv = na_server_get_timeout(s);
@@ -226,7 +226,7 @@ static VALUE
 server_style(VALUE rSelf, VALUE rServer, VALUE rStyle) {
 	na_server_t		*s;
 	na_style_t		cStyle;
-	
+
 	cStyle	= NUM2UINT(rStyle);
 	Data_Get_Struct(rServer, na_server_t, s);
 	rb_log(LOG_VERBOSE, "%s.server_style [calling]: style = %d", class_name, cStyle);
@@ -242,7 +242,7 @@ static VALUE
 server_set_debugstyle(VALUE rSelf, VALUE rServer, VALUE rStyle) {
 	na_server_t		*s;
 	na_style_t		cStyle;
-	
+
 	cStyle	= NUM2UINT(rStyle);
 	Data_Get_Struct(rServer, na_server_t, s);
 	rb_log(LOG_VERBOSE, "%s.na_server_set_debugstyle [calling]: style = %d", class_name, cStyle);
@@ -258,7 +258,7 @@ static VALUE
 server_set_server_type(VALUE rSelf, VALUE rServer, VALUE rType) {
 	na_server_t		*s;
 	int				cType, rv;
-	
+
 	cType	= NUM2UINT(rType);
 	Data_Get_Struct(rServer, na_server_t, s);
 	rb_log(LOG_VERBOSE, "%s.server_set_server_type [calling]: type = %d", class_name, cType);
@@ -274,7 +274,7 @@ static VALUE
 server_set_transport_type(VALUE rSelf, VALUE rServer, VALUE rType) {
 	na_server_t		*s;
 	int				cType, rv;
-	
+
 	cType	= NUM2UINT(rType);
 	Data_Get_Struct(rServer, na_server_t, s);
 	rb_log(LOG_VERBOSE, "%s.server_set_transport_type [calling]: type = %d", class_name, cType);
@@ -290,7 +290,7 @@ static VALUE
 server_set_port(VALUE rSelf, VALUE rServer, VALUE rPort) {
 	na_server_t		*s;
 	int				cPort, rv;
-	
+
 	cPort	= NUM2UINT(rPort);
 	Data_Get_Struct(rServer, na_server_t, s);
 	rb_log(LOG_VERBOSE, "%s.server_set_port [calling]: port = %d", class_name, cPort);
@@ -306,7 +306,7 @@ static VALUE
 server_set_timeout(VALUE rSelf, VALUE rServer, VALUE rTimeout) {
 	na_server_t		*s;
 	int				cTimeout, rv;
-	
+
 	cTimeout	= NUM2UINT(rTimeout);
 	Data_Get_Struct(rServer, na_server_t, s);
 	rb_log(LOG_VERBOSE, "%s.server_set_timeout [calling]: timeout = %d", class_name, cTimeout);
@@ -324,7 +324,7 @@ server_adminuser(VALUE rSelf, VALUE rServer, VALUE rLogin, VALUE rPwd) {
 	char			*cLogin;
 	char			*cPwd;
 	int				rv;
-	
+
 	cLogin	= StringValuePtr(rLogin);
 	cPwd	= StringValuePtr(rPwd);
 	Data_Get_Struct(rServer, na_server_t, s);
@@ -342,11 +342,11 @@ typedef struct  {
 static VALUE
 array_iter_func(VALUE ae, array_iter_arg_t *aia) {
 	na_elem_t	*ce;
-	
+
 	ce = na_elem_new(aia->key);
 	na_child_add(aia->elem, ce);
 	marshal_args(ce, ae);
-	
+
 	return Qnil;
 }
 
@@ -354,7 +354,7 @@ static int
 hash_iter_func(VALUE rKey, VALUE val, na_elem_t *elem) {
 	char		*cKey;
 	na_elem_t	*ce;
-	
+
 	if (TYPE(rKey) == T_SYMBOL) {
 		VALUE tv = obj_to_s(rKey);
 		cKey = StringValuePtr(tv);
@@ -365,7 +365,7 @@ hash_iter_func(VALUE rKey, VALUE val, na_elem_t *elem) {
 	else {
 		rb_raise(rb_eTypeError, "%s.hash_iter_func: hash key must be a string or symbol", class_name);
 	}
-		
+
 	if (TYPE(val) == T_ARRAY) {
 		array_iter_arg_t aia;
 		aia.key		= cKey;
@@ -377,7 +377,7 @@ hash_iter_func(VALUE rKey, VALUE val, na_elem_t *elem) {
 	ce = na_elem_new(cKey);
 	na_child_add(elem, ce);
 	marshal_args(ce, val);
-	
+
 	return 0;
 }
 
@@ -385,23 +385,23 @@ static void
 marshal_args(na_elem_t *elem, VALUE rObj) {
 	VALUE	rsv;
 	char	*csv;
-	
+
 	switch ( TYPE(rObj) ) {
 		case T_NIL:
 			return;
-		
+
 		case T_HASH:
-			rb_hash_foreach(rObj, hash_iter_func, (VALUE)elem); 
+			rb_hash_foreach(rObj, hash_iter_func, (VALUE)elem);
 			break;
-			
+
 		case T_ARRAY:
 			break;
-			
+
 		case T_STRING:
 			csv = StringValuePtr(rObj);
 			na_elem_set_content(elem, csv);
 			break;
-			
+
 		case T_FIXNUM:
 		case T_BIGNUM:
 		case T_TRUE:
@@ -410,7 +410,7 @@ marshal_args(na_elem_t *elem, VALUE rObj) {
 			csv = StringValuePtr(rsv);
 			na_elem_set_content(elem, csv);
 			break;
-			
+
 		default:
 			rb_raise(rb_eTypeError, "%s.marshal_args: Type = %d, not valid value", class_name, TYPE(rObj));
 			break;
@@ -427,21 +427,21 @@ unmarshal_elem(na_elem_t *elem) {
 	na_elem_t		*ce;
 	na_elem_iter_t	iter;
 	VALUE			rv, hv, ta, cn;
-	
+
 	if (!na_elem_has_children(elem)) {
 		return rb_str_new2(na_elem_get_content(elem));
 	}
-	
+
 	rv = nam_hash_new();
-	
+
 	for (iter = na_child_iterator(elem); (ce = na_iterator_next(&iter)) != NULL;) {
 		cn = rb_str_new2(na_elem_get_name(ce));
-		
+
 		if ((hv = rb_hash_aref(rv, cn)) == Qnil) {
 			rb_hash_aset(rv, cn, unmarshal_elem(ce));
 			continue;
 		}
-		
+
 		if (TYPE(hv) != T_ARRAY) {
 			ta = rb_ary_new();
 			rb_ary_push(ta, hv);
@@ -466,28 +466,28 @@ typedef struct  {
 static VALUE
 invoke_protect(VALUE arg) {
 	char *xml;
-	
+
 	invoke_protect_arg_t *ipap = (invoke_protect_arg_t *)arg;
-	
+
 	ipap->in = na_elem_new(ipap->cCmd);
 	marshal_args(ipap->in, ipap->rArgs);
-	
+
 	if (wire_dump && ((xml = na_elem_sprintf(ipap->in)) != NULL)) {
 		rb_log(LOG_VERBOSE, "%s.server_invoke: REQUEST START", class_name);
 		rb_log(LOG_VERBOSE, "%s", xml);
 		rb_log(LOG_VERBOSE, "%s.server_invoke: REQUEST END", class_name);
 		na_free(xml);
 	}
-	
+
 	ipap->out = na_server_invoke_elem(ipap->s, ipap->in);
-	
+
 	if (wire_dump && ((xml = na_elem_sprintf(ipap->out)) != NULL)) {
 		rb_log(LOG_VERBOSE, "%s.server_invoke: RESPONSE START", class_name);
 		rb_log(LOG_VERBOSE, "%s", xml);
 		rb_log(LOG_VERBOSE, "%s.server_invoke: RESPONSE END", class_name);
 		na_free(xml);
 	}
-	
+
 	if (na_results_status(ipap->out) != NA_OK) {
 		rb_raise(rb_eAPIError, "%s.server_invoke: Error %d: %s", class_name,
 					na_results_errno(ipap->out),
@@ -504,17 +504,17 @@ server_invoke(VALUE rSelf, VALUE rServer, VALUE rCmd, VALUE rArgs) {
 	invoke_protect_arg_t	ipa;
 	VALUE					rv;
 	int						exception;
-	
+
 	ipa.rArgs	= rArgs;
 	ipa.in		= NULL;
 	ipa.out		= NULL;
 	ipa.cCmd	= StringValuePtr(rCmd);
 	Data_Get_Struct(rServer, na_server_t, ipa.s);
-	
+
 	rb_log(LOG_VERBOSE, "%s.server_invoke [calling]: command = %s", class_name, ipa.cCmd);
 	rv = rb_protect(invoke_protect, (VALUE)&ipa, &exception);
 	rb_log(LOG_VERBOSE, "%s.server_invoke [returned]: command = %s", class_name, ipa.cCmd);
-	
+
 	if (ipa.in  != NULL) na_elem_free(ipa.in);
 	if (ipa.out != NULL) na_elem_free(ipa.out);
 
@@ -529,7 +529,7 @@ server_invoke(VALUE rSelf, VALUE rServer, VALUE rCmd, VALUE rArgs) {
  */
 void Init_net_app_manageability()	{
 	char	err[256];
-  
+
 	/*
 	 * Define the module.
 	 */
@@ -544,8 +544,7 @@ void Init_net_app_manageability()	{
 	 * Define the exception class.
 	 */
 	rb_eAPIError = rb_define_class_under(cAPI, exception_name, rb_eRuntimeError);
-  
-	
+
 	/*
 	 * Define class methods.
 	 */
@@ -562,37 +561,37 @@ void Init_net_app_manageability()	{
 	rb_define_singleton_method(cAPI, "server_set_timeout",			server_set_timeout,			2);
 	rb_define_singleton_method(cAPI, "server_adminuser",			server_adminuser,			3);
 	rb_define_singleton_method(cAPI, "server_invoke",				server_invoke,				3);
-	
+
 	rb_define_singleton_method(cAPI, "logger",						get_logger,					0);
 	rb_define_singleton_method(cAPI, "logger=",						set_logger,					1);
 	rb_define_singleton_method(cAPI, "verbose",						get_verbose,				0);
 	rb_define_singleton_method(cAPI, "verbose=",					set_verbose,				1);
 	rb_define_singleton_method(cAPI, "wire_dump",					get_wire_dump,				0);
 	rb_define_singleton_method(cAPI, "wire_dump=",					set_wire_dump,				1);
-	
+
 	/*
 	 * Create constants in this class based on values defined in netapp_api.h
 	 */
 	INTDEF2CONST(cAPI, NA_STYLE_LOGIN_PASSWORD);
 	INTDEF2CONST(cAPI, NA_STYLE_RPC);
 	INTDEF2CONST(cAPI, NA_STYLE_HOSTSEQUIV);
-	
+
 	INTDEF2CONST(cAPI, NA_SERVER_TRANSPORT_HTTP);
 	INTDEF2CONST(cAPI, NA_SERVER_TRANSPORT_HTTPS);
-	
+
 	INTDEF2CONST(cAPI, NA_SERVER_TYPE_FILER);
 	INTDEF2CONST(cAPI, NA_SERVER_TYPE_NETCACHE);
 	INTDEF2CONST(cAPI, NA_SERVER_TYPE_AGENT);
 	INTDEF2CONST(cAPI, NA_SERVER_TYPE_DFM);
 	INTDEF2CONST(cAPI, NA_SERVER_TYPE_CLUSTER);
-	
+
 	INTDEF2CONST(cAPI, NA_NO_DEBUG);
 	INTDEF2CONST(cAPI, NA_PRINT_DONT_PARSE);
 	INTDEF2CONST(cAPI, NA_DONT_PRINT_DONT_PARSE);
-	
+
 	cNAMHash = rb_const_get(mNetAppManageability, rb_intern(hash_class_name));
 	to_s_id = rb_intern("to_s");
-	
+
 	/*
 	 * Log levels.
 	 */
@@ -600,11 +599,11 @@ void Init_net_app_manageability()	{
 	log_warn	= rb_intern("warn");
 	log_error	= rb_intern("error");
 	log_debug	= rb_intern("debug");
-	
+
 	logger		= Qnil;
 	verbose		= FALSE;
 	wire_dump	= FALSE;
-	
+
 	/*
 	 * Initialize the library.
 	 */

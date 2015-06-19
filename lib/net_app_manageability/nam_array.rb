@@ -1,6 +1,6 @@
 module NetAppManageability
   class NAMArray < Array
-    
+
     def initialize(&block)
       super()
       unless block.nil?
