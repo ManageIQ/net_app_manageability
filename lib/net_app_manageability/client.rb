@@ -32,13 +32,19 @@ module NetAppManageability
       end
 
       raise "Client: No server specified" if @options.server.nil?
-      
-      @svrObj = API.server_open(@options.server, 1, 1)
-      API.server_style(@svrObj, @options.auth_style)
-      
+    end
+
+    def handle
+      return @handle unless @handle.nil?
+
+      @handle = API.server_open(options.server, 1, 1)
+      API.server_style(@handle, options.auth_style)
+
       if options.auth_style == NA_STYLE_LOGIN_PASSWORD
-        API.server_adminuser(@svrObj, @options.username, @options.password)
+        API.server_adminuser(@handle, options.username, options.password)
       end
+
+      @handle
     end
     
     def self.wire_dump
@@ -65,8 +71,9 @@ module NetAppManageability
       API.logger = val
     end
     
-    def method_missing(sym, *args, &block)
-      super(sym, args) unless (cmd = map_method(sym))
+    def method_missing(method_name, *args, &block)
+      cmd = map_method(method_name.to_sym)
+      return super if cmd.nil?
       
       ah = nil
       if args.length > 0 || !block.nil?
@@ -83,7 +90,11 @@ module NetAppManageability
         end
       end
       
-      return API.server_invoke(@svrObj, cmd, ah)
+      return API.server_invoke(handle, cmd, ah)
+    end
+
+    def respond_to_missing?(method_name, include_private = false)
+      map_method(method_name.to_sym) || super
     end
   end # class Client
 end

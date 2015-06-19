@@ -635,7 +635,7 @@ module OntapMethodMap
   }
 
   def map_method(msym)
-    return METHOD_MAP[msym]
+    METHOD_MAP[msym]
   end
 
 end # module OntapMethodMap
