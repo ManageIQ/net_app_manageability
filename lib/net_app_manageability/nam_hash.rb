@@ -21,8 +21,8 @@ module NetAppManageability
       return [ self ]
     end
 
-    def method_missing(sym, *args)
-      key = sym.to_s.sub(/^#{STRIP_PREFIX}/, "").tr('_', '-')
+    def method_missing(method_name, *args)
+      key = method_name.to_s.sub(/^#{STRIP_PREFIX}/, "").tr('_', '-')
       if key[-1, 1] == '='
         return (self[key[0...-1]] = args[0]) unless @symKeys
         return (self[key[0...-1].to_sym] = args[0])
@@ -33,6 +33,10 @@ module NetAppManageability
         return self[key] unless @symKeys
         return self[key.to_sym]
       end
+    end
+
+    def respond_to_missing?(*_args)
+      true
     end
   end
 end
