@@ -3,7 +3,7 @@
 Ruby binding to NetApp Manageability SDK.
 
 [![Gem Version](https://badge.fury.io/rb/net_app_manageability.svg)](http://badge.fury.io/rb/net_app_manageability)
-[![Build Status](https://travis-ci.org/ManageIQ/net_app_manageability.svg)](https://travis-ci.org/ManageIQ/net_app_manageability)
+[![Code Climate](http://img.shields.io/codeclimate/github/ManageIQ/net_app_manageability.svg)](https://codeclimate.com/github/ManageIQ/net_app_manageability)
 [![Dependency Status](https://gemnasium.com/ManageIQ/net_app_manageability.svg)](https://gemnasium.com/ManageIQ/net_app_manageability)
 
 ## Installation
