@@ -1,6 +1,6 @@
 # NetAppManageability
 
-Ruby module to interact with block devices on Linux platforms.
+Ruby binding to NetApp Manageability SDK.
 
 [![Gem Version](https://badge.fury.io/rb/net_app_manageability.svg)](http://badge.fury.io/rb/net_app_manageability)
 [![Build Status](https://travis-ci.org/ManageIQ/net_app_manageability.svg)](https://travis-ci.org/ManageIQ/net_app_manageability)
@@ -21,6 +21,10 @@ And then execute:
 Or install it yourself as:
 
     $ gem install net_app_manageability
+
+## Usage
+
+For examples of usage, see the [examples](examples).
 
 ## Development
 
