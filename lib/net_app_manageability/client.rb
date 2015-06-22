@@ -47,6 +47,10 @@ module NetAppManageability
       @handle
     end
 
+    def self.available?
+      true
+    end
+
     def self.wire_dump
       API.wire_dump
     end

@@ -4,6 +4,10 @@ module NetAppManageability
       attr_accessor :error_message
     end
 
+    def self.available?
+      false
+    end
+
     def initialize(*)
       raise "#{self.class.name} could not be loaded due to the following error: #{self.class.error_message}"
     end
