@@ -3,25 +3,34 @@
 #include <stdarg.h>
 
 #include "ruby.h"
+
+#ifdef HAVE_NETAPP_API_H
 #include "netapp_api.h"
 
 static void	marshal_args(na_elem_t *elem, VALUE rObj);
+#endif
 
 static const char *module_name     = "NetAppManageability";
 static const char *class_name      = "API";
 static const char *exception_name  = "Error";
+
+#ifdef HAVE_NETAPP_API_H
 static const char *hash_class_name = "NAMHash";
+#endif
 
 static	VALUE	mNetAppManageability;
 static	VALUE	cAPI;
 static	VALUE	rb_eAPIError;
-static	VALUE	cNAMHash;
 
+#ifdef HAVE_NETAPP_API_H
+static	VALUE	cNAMHash;
 static	ID		to_s_id;
+#endif
 
 #define	TRUE	1
 #define	FALSE	0
 
+#ifdef HAVE_NETAPP_API_H
 /*
  * Create a class constant based on the given object-like macro.
  */
@@ -41,6 +50,7 @@ obj_to_s(VALUE obj) {
 }
 
 #define LOG_VERBOSE  (verbose ? log_info : log_debug)
+#endif
 
 /*
  * The ruby logger instance used by this code to log messages.
@@ -57,6 +67,7 @@ static VALUE	log_warn;
 static VALUE	log_error;
 static VALUE	log_debug;
 
+#ifdef HAVE_NETAPP_API_H
 static void
 rb_log(VALUE level, const char *fmt, ...)	{
 	va_list ap;
@@ -91,6 +102,7 @@ rb_log(VALUE level, const char *fmt, ...)	{
 	rb_funcall(logger, level, 1, rb_str_new2(p));
 	free(p);
 }
+#endif
 
 static VALUE
 get_logger(VALUE rSelf) {
@@ -137,6 +149,7 @@ set_wire_dump(VALUE self, VALUE rBool)  {
 	return wire_dump ? Qtrue : Qfalse;
 }
 
+#ifdef HAVE_NETAPP_API_H
 /*
  * The "server_open" class method.
  */
@@ -175,7 +188,7 @@ server_get_style(VALUE rSelf, VALUE rServer) {
 }
 
 /*
- * The "server_get_transport_type class method.
+ * The "server_get_transport_type" class method.
  */
 static VALUE
 server_get_transport_type(VALUE rSelf, VALUE rServer) {
@@ -190,7 +203,7 @@ server_get_transport_type(VALUE rSelf, VALUE rServer) {
 }
 
 /*
- * The "server_get_port class method.
+ * The "server_get_port" class method.
  */
 static VALUE
 server_get_port(VALUE rSelf, VALUE rServer) {
@@ -205,7 +218,7 @@ server_get_port(VALUE rSelf, VALUE rServer) {
 }
 
 /*
- * The "server_get_timeout class method.
+ * The "server_get_timeout" class method.
  */
 static VALUE
 server_get_timeout(VALUE rSelf, VALUE rServer) {
@@ -523,12 +536,15 @@ server_invoke(VALUE rSelf, VALUE rServer, VALUE rCmd, VALUE rArgs) {
 	}
 	return rv;
 }
+#endif
 
 /*
  * Initialize the class.
  */
 void Init_net_app_manageability()	{
+#ifdef HAVE_NETAPP_API_H
 	char	err[256];
+#endif
 
 	/*
 	 * Define the module.
@@ -545,6 +561,7 @@ void Init_net_app_manageability()	{
 	 */
 	rb_eAPIError = rb_define_class_under(cAPI, exception_name, rb_eRuntimeError);
 
+#ifdef HAVE_NETAPP_API_H
 	/*
 	 * Define class methods.
 	 */
@@ -561,6 +578,7 @@ void Init_net_app_manageability()	{
 	rb_define_singleton_method(cAPI, "server_set_timeout",			server_set_timeout,			2);
 	rb_define_singleton_method(cAPI, "server_adminuser",			server_adminuser,			3);
 	rb_define_singleton_method(cAPI, "server_invoke",				server_invoke,				3);
+#endif
 
 	rb_define_singleton_method(cAPI, "logger",						get_logger,					0);
 	rb_define_singleton_method(cAPI, "logger=",						set_logger,					1);
@@ -569,6 +587,7 @@ void Init_net_app_manageability()	{
 	rb_define_singleton_method(cAPI, "wire_dump",					get_wire_dump,				0);
 	rb_define_singleton_method(cAPI, "wire_dump=",					set_wire_dump,				1);
 
+#ifdef HAVE_NETAPP_API_H
 	/*
 	 * Create constants in this class based on values defined in netapp_api.h
 	 */
@@ -591,6 +610,7 @@ void Init_net_app_manageability()	{
 
 	cNAMHash = rb_const_get(mNetAppManageability, rb_intern(hash_class_name));
 	to_s_id = rb_intern("to_s");
+#endif
 
 	/*
 	 * Log levels.
@@ -604,10 +624,12 @@ void Init_net_app_manageability()	{
 	verbose		= FALSE;
 	wire_dump	= FALSE;
 
+#ifdef HAVE_NETAPP_API_H
 	/*
 	 * Initialize the library.
 	 */
 	if (!na_startup(err, sizeof(err))) {
 		rb_raise(rb_eAPIError, "Error in na_startup: %s", err);
 	}
+#endif
 }

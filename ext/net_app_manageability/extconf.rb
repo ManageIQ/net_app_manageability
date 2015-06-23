@@ -14,15 +14,7 @@ else
   dir_config("netapp-manageability-sdk")
 end
 
-unless have_header("netapp_api.h")
-  STDERR.puts "Could not find netapp_api.h"
-  exit 1
-end
-
-missing_libs = libs.reject { |lib| have_library(lib) }
-if missing_libs.any?
-  STDERR.puts "Could not find libraries: #{missing_libs.join(", ")}"
-  exit 1
-end
+have_header("netapp_api.h")
+libs.each { |lib| have_library(lib) }
 
 create_makefile("net_app_manageability/net_app_manageability")
