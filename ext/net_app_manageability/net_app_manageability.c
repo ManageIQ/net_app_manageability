@@ -25,6 +25,7 @@ static	VALUE	rb_eAPIError;
 #ifdef HAVE_NETAPP_API_H
 static	VALUE	cNAMHash;
 static	ID		to_s_id;
+static	ID		id_logger;
 #endif
 
 #define	TRUE	1
@@ -55,7 +56,6 @@ obj_to_s(VALUE obj) {
 /*
  * The ruby logger instance used by this code to log messages.
  */
-static VALUE	logger;
 static int		verbose;
 static int		wire_dump;
 
@@ -70,10 +70,13 @@ static VALUE	log_debug;
 #ifdef HAVE_NETAPP_API_H
 static void
 rb_log(VALUE level, const char *fmt, ...)	{
+	VALUE logger;
 	va_list ap;
+	VALUE logger;
 	char *p, *np;
 	int n, size = 128;
 
+	logger = rb_funcall(cAPI, id_logger, 0);
 	if (logger == Qnil) {
 		return;
 	}
@@ -103,17 +106,6 @@ rb_log(VALUE level, const char *fmt, ...)	{
 	free(p);
 }
 #endif
-
-static VALUE
-get_logger(VALUE rSelf) {
-	return logger;
-}
-
-static VALUE
-set_logger(VALUE rSelf, VALUE rLogger) {
-	logger = rLogger;
-	return logger;
-}
 
 /*
  * The "verbose" class method.
@@ -580,8 +572,6 @@ void Init_net_app_manageability()	{
 	rb_define_singleton_method(cAPI, "server_invoke",				server_invoke,				3);
 #endif
 
-	rb_define_singleton_method(cAPI, "logger",						get_logger,					0);
-	rb_define_singleton_method(cAPI, "logger=",						set_logger,					1);
 	rb_define_singleton_method(cAPI, "verbose",						get_verbose,				0);
 	rb_define_singleton_method(cAPI, "verbose=",					set_verbose,				1);
 	rb_define_singleton_method(cAPI, "wire_dump",					get_wire_dump,				0);
@@ -608,8 +598,9 @@ void Init_net_app_manageability()	{
 	INTDEF2CONST(cAPI, NA_PRINT_DONT_PARSE);
 	INTDEF2CONST(cAPI, NA_DONT_PRINT_DONT_PARSE);
 
-	cNAMHash = rb_const_get(mNetAppManageability, rb_intern(hash_class_name));
-	to_s_id = rb_intern("to_s");
+	cNAMHash	= rb_const_get(mNetAppManageability, rb_intern(hash_class_name));
+	to_s_id		= rb_intern("to_s");
+	id_logger	= rb_intern("logger");
 #endif
 
 	/*
@@ -620,7 +611,6 @@ void Init_net_app_manageability()	{
 	log_error	= rb_intern("error");
 	log_debug	= rb_intern("debug");
 
-	logger		= Qnil;
 	verbose		= FALSE;
 	wire_dump	= FALSE;
 
