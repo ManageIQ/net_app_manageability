@@ -26,6 +26,9 @@ static	VALUE	rb_eAPIError;
 static	VALUE	cNAMHash;
 static	ID		to_s_id;
 static	ID		id_logger;
+static	ID		id_verbose;
+static	ID		id_info;
+static	ID		id_debug;
 #endif
 
 #define	TRUE	1
@@ -50,27 +53,18 @@ obj_to_s(VALUE obj) {
 	return rb_funcall(obj, to_s_id, 0);
 }
 
-#define LOG_VERBOSE  (verbose ? log_info : log_debug)
+#define LOG_VERBOSE \
+		(RTEST(rb_funcall(cAPI, id_verbose, 0)) ? id_info : id_debug)
 #endif
 
 /*
  * The ruby logger instance used by this code to log messages.
  */
-static int		verbose;
 static int		wire_dump;
-
-/*
- * Log levels for logger.
- */
-static VALUE	log_info;
-static VALUE	log_warn;
-static VALUE	log_error;
-static VALUE	log_debug;
 
 #ifdef HAVE_NETAPP_API_H
 static void
-rb_log(VALUE level, const char *fmt, ...)	{
-	VALUE logger;
+rb_log(ID level, const char *fmt, ...)	{
 	va_list ap;
 	VALUE logger;
 	char *p, *np;
@@ -106,23 +100,6 @@ rb_log(VALUE level, const char *fmt, ...)	{
 	free(p);
 }
 #endif
-
-/*
- * The "verbose" class method.
- */
-static VALUE
-get_verbose(VALUE self)  {
-	return verbose ? Qtrue : Qfalse;
-}
-
-/*
- * The "verbose=" class method.
- */
-static VALUE
-set_verbose(VALUE self, VALUE rBool)  {
-	verbose = RTEST(rBool) ? TRUE : FALSE;
-	return verbose ? Qtrue : Qfalse;
-}
 
 /*
  * The "wire_dump" class method.
@@ -572,8 +549,6 @@ void Init_net_app_manageability()	{
 	rb_define_singleton_method(cAPI, "server_invoke",				server_invoke,				3);
 #endif
 
-	rb_define_singleton_method(cAPI, "verbose",						get_verbose,				0);
-	rb_define_singleton_method(cAPI, "verbose=",					set_verbose,				1);
 	rb_define_singleton_method(cAPI, "wire_dump",					get_wire_dump,				0);
 	rb_define_singleton_method(cAPI, "wire_dump=",					set_wire_dump,				1);
 
@@ -601,17 +576,14 @@ void Init_net_app_manageability()	{
 	cNAMHash	= rb_const_get(mNetAppManageability, rb_intern(hash_class_name));
 	to_s_id		= rb_intern("to_s");
 	id_logger	= rb_intern("logger");
+	id_verbose	= rb_intern("verbose");
+	id_info		= rb_intern("info");
+	id_debug	= rb_intern("debug");
 #endif
 
 	/*
 	 * Log levels.
 	 */
-	log_info	= rb_intern("info");
-	log_warn	= rb_intern("warn");
-	log_error	= rb_intern("error");
-	log_debug	= rb_intern("debug");
-
-	verbose		= FALSE;
 	wire_dump	= FALSE;
 
 #ifdef HAVE_NETAPP_API_H
