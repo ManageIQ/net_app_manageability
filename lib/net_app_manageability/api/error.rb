@@ -1,5 +1,5 @@
 module NetAppManageability
-  module API
+  class API
     class Error < RuntimeError
     end
   end
