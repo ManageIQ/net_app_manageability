@@ -7,22 +7,16 @@
 #ifdef HAVE_NETAPP_API_H
 #include "netapp_api.h"
 
-static void	marshal_args(na_elem_t *elem, VALUE rObj);
-#endif
+static void    marshal_args(na_elem_t *elem, VALUE rObj);
 
 static const char *module_name     = "NetAppManageability";
 static const char *class_name      = "API";
 static const char *exception_name  = "Error";
-
-#ifdef HAVE_NETAPP_API_H
 static const char *hash_class_name = "NAMHash";
-#endif
 
 static	VALUE	mNetAppManageability;
 static	VALUE	cAPI;
 static	VALUE	rb_eAPIError;
-
-#ifdef HAVE_NETAPP_API_H
 static	VALUE	cNAMHash;
 static	ID		to_s_id;
 static	ID		id_logger;
@@ -485,24 +479,10 @@ server_invoke(VALUE rSelf, VALUE rServer, VALUE rCmd, VALUE rArgs) {
 void Init_net_app_manageability()	{
 #ifdef HAVE_NETAPP_API_H
 	char	err[256];
-#endif
 
-	/*
-	 * Define the module.
-	 */
-	mNetAppManageability = rb_define_module(module_name);
+	mNetAppManageability	= rb_const_get(rb_cObject,				rb_intern(module_name));
+	cAPI					= rb_const_get(mNetAppManageability,	rb_intern(class_name));
 
-	/*
-	 * Define the class.
-	 */
-	cAPI = rb_define_class_under(mNetAppManageability, class_name, rb_cObject);
-
-	/*
-	 * Define the exception class.
-	 */
-	rb_eAPIError = rb_define_class_under(cAPI, exception_name, rb_eRuntimeError);
-
-#ifdef HAVE_NETAPP_API_H
 	/*
 	 * Define class methods.
 	 */
@@ -540,7 +520,9 @@ void Init_net_app_manageability()	{
 	INTDEF2CONST(cAPI, NA_PRINT_DONT_PARSE);
 	INTDEF2CONST(cAPI, NA_DONT_PRINT_DONT_PARSE);
 
-	cNAMHash		= rb_const_get(mNetAppManageability, rb_intern(hash_class_name));
+	rb_eAPIError	= rb_const_get(cAPI,					rb_intern(exception_name));
+	cNAMHash		= rb_const_get(mNetAppManageability,	rb_intern(hash_class_name));
+
 	to_s_id			= rb_intern("to_s");
 	id_logger		= rb_intern("logger");
 	id_verbose		= rb_intern("verbose");
