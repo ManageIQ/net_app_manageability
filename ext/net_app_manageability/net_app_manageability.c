@@ -27,14 +27,10 @@ static	VALUE	cNAMHash;
 static	ID		to_s_id;
 static	ID		id_logger;
 static	ID		id_verbose;
+static	ID		id_wire_dump;
 static	ID		id_info;
 static	ID		id_debug;
-#endif
 
-#define	TRUE	1
-#define	FALSE	0
-
-#ifdef HAVE_NETAPP_API_H
 /*
  * Create a class constant based on the given object-like macro.
  */
@@ -55,14 +51,9 @@ obj_to_s(VALUE obj) {
 
 #define LOG_VERBOSE \
 		(RTEST(rb_funcall(cAPI, id_verbose, 0)) ? id_info : id_debug)
-#endif
+#define WIRE_DUMP \
+		(RTEST(rb_funcall(cAPI, id_wire_dump, 0)))
 
-/*
- * The ruby logger instance used by this code to log messages.
- */
-static int		wire_dump;
-
-#ifdef HAVE_NETAPP_API_H
 static void
 rb_log(ID level, const char *fmt, ...)	{
 	va_list ap;
@@ -99,26 +90,7 @@ rb_log(ID level, const char *fmt, ...)	{
 	rb_funcall(logger, level, 1, rb_str_new2(p));
 	free(p);
 }
-#endif
 
-/*
- * The "wire_dump" class method.
- */
-static VALUE
-get_wire_dump(VALUE self)  {
-	return wire_dump ? Qtrue : Qfalse;
-}
-
-/*
- * The "wire_dump=" class method.
- */
-static VALUE
-set_wire_dump(VALUE self, VALUE rBool)  {
-	wire_dump = RTEST(rBool) ? TRUE : FALSE;
-	return wire_dump ? Qtrue : Qfalse;
-}
-
-#ifdef HAVE_NETAPP_API_H
 /*
  * The "server_open" class method.
  */
@@ -454,7 +426,7 @@ invoke_protect(VALUE arg) {
 	ipap->in = na_elem_new(ipap->cCmd);
 	marshal_args(ipap->in, ipap->rArgs);
 
-	if (wire_dump && ((xml = na_elem_sprintf(ipap->in)) != NULL)) {
+	if (WIRE_DUMP && ((xml = na_elem_sprintf(ipap->in)) != NULL)) {
 		rb_log(LOG_VERBOSE, "%s.server_invoke: REQUEST START", class_name);
 		rb_log(LOG_VERBOSE, "%s", xml);
 		rb_log(LOG_VERBOSE, "%s.server_invoke: REQUEST END", class_name);
@@ -463,7 +435,7 @@ invoke_protect(VALUE arg) {
 
 	ipap->out = na_server_invoke_elem(ipap->s, ipap->in);
 
-	if (wire_dump && ((xml = na_elem_sprintf(ipap->out)) != NULL)) {
+	if (WIRE_DUMP && ((xml = na_elem_sprintf(ipap->out)) != NULL)) {
 		rb_log(LOG_VERBOSE, "%s.server_invoke: RESPONSE START", class_name);
 		rb_log(LOG_VERBOSE, "%s", xml);
 		rb_log(LOG_VERBOSE, "%s.server_invoke: RESPONSE END", class_name);
@@ -547,12 +519,7 @@ void Init_net_app_manageability()	{
 	rb_define_singleton_method(cAPI, "server_set_timeout",			server_set_timeout,			2);
 	rb_define_singleton_method(cAPI, "server_adminuser",			server_adminuser,			3);
 	rb_define_singleton_method(cAPI, "server_invoke",				server_invoke,				3);
-#endif
 
-	rb_define_singleton_method(cAPI, "wire_dump",					get_wire_dump,				0);
-	rb_define_singleton_method(cAPI, "wire_dump=",					set_wire_dump,				1);
-
-#ifdef HAVE_NETAPP_API_H
 	/*
 	 * Create constants in this class based on values defined in netapp_api.h
 	 */
@@ -573,20 +540,14 @@ void Init_net_app_manageability()	{
 	INTDEF2CONST(cAPI, NA_PRINT_DONT_PARSE);
 	INTDEF2CONST(cAPI, NA_DONT_PRINT_DONT_PARSE);
 
-	cNAMHash	= rb_const_get(mNetAppManageability, rb_intern(hash_class_name));
-	to_s_id		= rb_intern("to_s");
-	id_logger	= rb_intern("logger");
-	id_verbose	= rb_intern("verbose");
-	id_info		= rb_intern("info");
-	id_debug	= rb_intern("debug");
-#endif
+	cNAMHash		= rb_const_get(mNetAppManageability, rb_intern(hash_class_name));
+	to_s_id			= rb_intern("to_s");
+	id_logger		= rb_intern("logger");
+	id_verbose		= rb_intern("verbose");
+	id_wire_dump	= rb_intern("wire_dump");
+	id_info			= rb_intern("info");
+	id_debug		= rb_intern("debug");
 
-	/*
-	 * Log levels.
-	 */
-	wire_dump	= FALSE;
-
-#ifdef HAVE_NETAPP_API_H
 	/*
 	 * Initialize the library.
 	 */
