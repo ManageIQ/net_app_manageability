@@ -1,4 +1,10 @@
 require "net_app_manageability/version"
 require "net_app_manageability/types"
+require "net_app_manageability/api"
 require "net_app_manageability/net_app_manageability"
-require "net_app_manageability/client"
+
+if NetAppManageability::API.respond_to?(:server_open)
+  require "net_app_manageability/client"
+else
+  require "net_app_manageability/client_stub"
+end

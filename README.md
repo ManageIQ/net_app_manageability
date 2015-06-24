@@ -8,9 +8,16 @@ Ruby binding to NetApp Manageability SDK.
 
 ## Installation
 
-First, install the NetApp Manageability SDK.  This is only provided by NetApp
-directly.  For the next steps, we will assume these files are located in
-`$INSTALL_DIR`.
+First, install the NetApp Manageability SDK.
+
+- This is only provided by NetApp directly.  For the next steps, we will assume these files are located in `$INSTALL_DIR`.
+
+- Create symlinks for libssl and libcrypto, if necessary.
+
+  ```sh
+  ln -s libssl.so $INSTALL_DIR/lib/linux-64/libssl.so.0.9.8
+  ln -s libcrypto.so $INSTALL_DIR/lib/linux-64/libcrypto.so.0.9.8
+  ```
 
 Next, if using bundler
 

@@ -9,10 +9,12 @@ describe NetAppManageability::Client do
   end
 
   it "non-existent method" do
+    pending_if_not_available
     expect(client).to_not respond_to(:foobar)
   end
 
   it "#aggr_add" do
+    pending_if_not_available
     expect(client).to respond_to(:aggr_add)
   end
 end

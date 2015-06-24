@@ -3,9 +3,11 @@
 #include <stdarg.h>
 
 #include "ruby.h"
+
+#ifdef HAVE_NETAPP_API_H
 #include "netapp_api.h"
 
-static void	marshal_args(na_elem_t *elem, VALUE rObj);
+static void    marshal_args(na_elem_t *elem, VALUE rObj);
 
 static const char *module_name     = "NetAppManageability";
 static const char *class_name      = "API";
@@ -17,18 +19,27 @@ static	VALUE	cAPI;
 static	VALUE	rb_eAPIError;
 static	VALUE	cNAMHash;
 
-static	ID		to_s_id;
-
-#define	TRUE	1
-#define	FALSE	0
+static	ID		id_to_s;
+static	ID		id_logger;
+static	ID		id_verbose;
+static	ID		id_wire_dump;
+static	ID		id_info;
+static	ID		id_debug;
 
 /*
  * Create a class constant based on the given object-like macro.
  */
 #define INTDEF2CONST(klass, intdef) \
-		 rb_define_const(klass, #intdef, INT2NUM(intdef))
+	rb_define_const(klass, #intdef, INT2NUM(intdef))
 
-#define	INT2BOOL(v)		( (v) ? Qtrue : Qfalse )
+#define INT2BOOL(v) \
+	(v ? Qtrue : Qfalse)
+
+#define LOG_VERBOSE \
+	(RTEST(rb_funcall(cAPI, id_verbose, 0)) ? id_info : id_debug)
+
+#define WIRE_DUMP \
+	(RTEST(rb_funcall(cAPI, id_wire_dump, 0)))
 
 static void
 server_free(void *p)	{
@@ -37,32 +48,17 @@ server_free(void *p)	{
 
 static VALUE
 obj_to_s(VALUE obj) {
-	return rb_funcall(obj, to_s_id, 0);
+	return rb_funcall(obj, id_to_s, 0);
 }
 
-#define LOG_VERBOSE  (verbose ? log_info : log_debug)
-
-/*
- * The ruby logger instance used by this code to log messages.
- */
-static VALUE	logger;
-static int		verbose;
-static int		wire_dump;
-
-/*
- * Log levels for logger.
- */
-static VALUE	log_info;
-static VALUE	log_warn;
-static VALUE	log_error;
-static VALUE	log_debug;
-
 static void
-rb_log(VALUE level, const char *fmt, ...)	{
+rb_log(ID level, const char *fmt, ...)	{
 	va_list ap;
+	VALUE logger;
 	char *p, *np;
 	int n, size = 128;
 
+	logger = rb_funcall(cAPI, id_logger, 0);
 	if (logger == Qnil) {
 		return;
 	}
@@ -90,51 +86,6 @@ rb_log(VALUE level, const char *fmt, ...)	{
 
 	rb_funcall(logger, level, 1, rb_str_new2(p));
 	free(p);
-}
-
-static VALUE
-get_logger(VALUE rSelf) {
-	return logger;
-}
-
-static VALUE
-set_logger(VALUE rSelf, VALUE rLogger) {
-	logger = rLogger;
-	return logger;
-}
-
-/*
- * The "verbose" class method.
- */
-static VALUE
-get_verbose(VALUE self)  {
-	return verbose ? Qtrue : Qfalse;
-}
-
-/*
- * The "verbose=" class method.
- */
-static VALUE
-set_verbose(VALUE self, VALUE rBool)  {
-	verbose = RTEST(rBool) ? TRUE : FALSE;
-	return verbose ? Qtrue : Qfalse;
-}
-
-/*
- * The "wire_dump" class method.
- */
-static VALUE
-get_wire_dump(VALUE self)  {
-	return wire_dump ? Qtrue : Qfalse;
-}
-
-/*
- * The "wire_dump=" class method.
- */
-static VALUE
-set_wire_dump(VALUE self, VALUE rBool)  {
-	wire_dump = RTEST(rBool) ? TRUE : FALSE;
-	return wire_dump ? Qtrue : Qfalse;
 }
 
 /*
@@ -175,7 +126,7 @@ server_get_style(VALUE rSelf, VALUE rServer) {
 }
 
 /*
- * The "server_get_transport_type class method.
+ * The "server_get_transport_type" class method.
  */
 static VALUE
 server_get_transport_type(VALUE rSelf, VALUE rServer) {
@@ -190,7 +141,7 @@ server_get_transport_type(VALUE rSelf, VALUE rServer) {
 }
 
 /*
- * The "server_get_port class method.
+ * The "server_get_port" class method.
  */
 static VALUE
 server_get_port(VALUE rSelf, VALUE rServer) {
@@ -205,7 +156,7 @@ server_get_port(VALUE rSelf, VALUE rServer) {
 }
 
 /*
- * The "server_get_timeout class method.
+ * The "server_get_timeout" class method.
  */
 static VALUE
 server_get_timeout(VALUE rSelf, VALUE rServer) {
@@ -472,7 +423,7 @@ invoke_protect(VALUE arg) {
 	ipap->in = na_elem_new(ipap->cCmd);
 	marshal_args(ipap->in, ipap->rArgs);
 
-	if (wire_dump && ((xml = na_elem_sprintf(ipap->in)) != NULL)) {
+	if (WIRE_DUMP && ((xml = na_elem_sprintf(ipap->in)) != NULL)) {
 		rb_log(LOG_VERBOSE, "%s.server_invoke: REQUEST START", class_name);
 		rb_log(LOG_VERBOSE, "%s", xml);
 		rb_log(LOG_VERBOSE, "%s.server_invoke: REQUEST END", class_name);
@@ -481,7 +432,7 @@ invoke_protect(VALUE arg) {
 
 	ipap->out = na_server_invoke_elem(ipap->s, ipap->in);
 
-	if (wire_dump && ((xml = na_elem_sprintf(ipap->out)) != NULL)) {
+	if (WIRE_DUMP && ((xml = na_elem_sprintf(ipap->out)) != NULL)) {
 		rb_log(LOG_VERBOSE, "%s.server_invoke: RESPONSE START", class_name);
 		rb_log(LOG_VERBOSE, "%s", xml);
 		rb_log(LOG_VERBOSE, "%s.server_invoke: RESPONSE END", class_name);
@@ -523,27 +474,17 @@ server_invoke(VALUE rSelf, VALUE rServer, VALUE rCmd, VALUE rArgs) {
 	}
 	return rv;
 }
+#endif
 
 /*
  * Initialize the class.
  */
 void Init_net_app_manageability()	{
+#ifdef HAVE_NETAPP_API_H
 	char	err[256];
 
-	/*
-	 * Define the module.
-	 */
-	mNetAppManageability = rb_define_module(module_name);
-
-	/*
-	 * Define the class.
-	 */
-	cAPI = rb_define_class_under(mNetAppManageability, class_name, rb_cObject);
-
-	/*
-	 * Define the exception class.
-	 */
-	rb_eAPIError = rb_define_class_under(cAPI, exception_name, rb_eRuntimeError);
+	mNetAppManageability	= rb_const_get(rb_cObject,				rb_intern(module_name));
+	cAPI					= rb_const_get(mNetAppManageability,	rb_intern(class_name));
 
 	/*
 	 * Define class methods.
@@ -561,13 +502,6 @@ void Init_net_app_manageability()	{
 	rb_define_singleton_method(cAPI, "server_set_timeout",			server_set_timeout,			2);
 	rb_define_singleton_method(cAPI, "server_adminuser",			server_adminuser,			3);
 	rb_define_singleton_method(cAPI, "server_invoke",				server_invoke,				3);
-
-	rb_define_singleton_method(cAPI, "logger",						get_logger,					0);
-	rb_define_singleton_method(cAPI, "logger=",						set_logger,					1);
-	rb_define_singleton_method(cAPI, "verbose",						get_verbose,				0);
-	rb_define_singleton_method(cAPI, "verbose=",					set_verbose,				1);
-	rb_define_singleton_method(cAPI, "wire_dump",					get_wire_dump,				0);
-	rb_define_singleton_method(cAPI, "wire_dump=",					set_wire_dump,				1);
 
 	/*
 	 * Create constants in this class based on values defined in netapp_api.h
@@ -589,20 +523,15 @@ void Init_net_app_manageability()	{
 	INTDEF2CONST(cAPI, NA_PRINT_DONT_PARSE);
 	INTDEF2CONST(cAPI, NA_DONT_PRINT_DONT_PARSE);
 
-	cNAMHash = rb_const_get(mNetAppManageability, rb_intern(hash_class_name));
-	to_s_id = rb_intern("to_s");
+	rb_eAPIError	= rb_const_get(cAPI,					rb_intern(exception_name));
+	cNAMHash		= rb_const_get(mNetAppManageability,	rb_intern(hash_class_name));
 
-	/*
-	 * Log levels.
-	 */
-	log_info	= rb_intern("info");
-	log_warn	= rb_intern("warn");
-	log_error	= rb_intern("error");
-	log_debug	= rb_intern("debug");
-
-	logger		= Qnil;
-	verbose		= FALSE;
-	wire_dump	= FALSE;
+	id_to_s			= rb_intern("to_s");
+	id_logger		= rb_intern("logger");
+	id_verbose		= rb_intern("verbose");
+	id_wire_dump	= rb_intern("wire_dump");
+	id_info			= rb_intern("info");
+	id_debug		= rb_intern("debug");
 
 	/*
 	 * Initialize the library.
@@ -610,4 +539,5 @@ void Init_net_app_manageability()	{
 	if (!na_startup(err, sizeof(err))) {
 		rb_raise(rb_eAPIError, "Error in na_startup: %s", err);
 	}
+#endif
 }
