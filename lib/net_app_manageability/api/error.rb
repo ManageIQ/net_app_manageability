@@ -1,6 +1,6 @@
 module NetAppManageability
   class API
-    class Error < RuntimeError
+    class Error < NetAppManageability::Error
     end
   end
 end
