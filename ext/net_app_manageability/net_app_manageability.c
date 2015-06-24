@@ -18,7 +18,8 @@ static	VALUE	mNetAppManageability;
 static	VALUE	cAPI;
 static	VALUE	rb_eAPIError;
 static	VALUE	cNAMHash;
-static	ID		to_s_id;
+
+static	ID		id_to_s;
 static	ID		id_logger;
 static	ID		id_verbose;
 static	ID		id_wire_dump;
@@ -29,9 +30,16 @@ static	ID		id_debug;
  * Create a class constant based on the given object-like macro.
  */
 #define INTDEF2CONST(klass, intdef) \
-		 rb_define_const(klass, #intdef, INT2NUM(intdef))
+	rb_define_const(klass, #intdef, INT2NUM(intdef))
 
-#define	INT2BOOL(v)		( (v) ? Qtrue : Qfalse )
+#define INT2BOOL(v) \
+	(v ? Qtrue : Qfalse)
+
+#define LOG_VERBOSE \
+	(RTEST(rb_funcall(cAPI, id_verbose, 0)) ? id_info : id_debug)
+
+#define WIRE_DUMP \
+	(RTEST(rb_funcall(cAPI, id_wire_dump, 0)))
 
 static void
 server_free(void *p)	{
@@ -40,13 +48,8 @@ server_free(void *p)	{
 
 static VALUE
 obj_to_s(VALUE obj) {
-	return rb_funcall(obj, to_s_id, 0);
+	return rb_funcall(obj, id_to_s, 0);
 }
-
-#define LOG_VERBOSE \
-		(RTEST(rb_funcall(cAPI, id_verbose, 0)) ? id_info : id_debug)
-#define WIRE_DUMP \
-		(RTEST(rb_funcall(cAPI, id_wire_dump, 0)))
 
 static void
 rb_log(ID level, const char *fmt, ...)	{
@@ -523,7 +526,7 @@ void Init_net_app_manageability()	{
 	rb_eAPIError	= rb_const_get(cAPI,					rb_intern(exception_name));
 	cNAMHash		= rb_const_get(mNetAppManageability,	rb_intern(hash_class_name));
 
-	to_s_id			= rb_intern("to_s");
+	id_to_s			= rb_intern("to_s");
 	id_logger		= rb_intern("logger");
 	id_verbose		= rb_intern("verbose");
 	id_wire_dump	= rb_intern("wire_dump");
